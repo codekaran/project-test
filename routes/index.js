@@ -103,10 +103,7 @@ router.post("/rescheduleAppointment", async (req, res) => {
   let newDate = newSlot.split(" ")[0];
   let newStartTime = newSlot.split(" ")[1];
   let newEndTime = newSlot.split(" ")[2];
-  // let existingAppointment = await Appointment.find(
-  //   { date: oldDate },
-  //   { _id: 0 }
-  // );
+
   let status = await Appointment.findOneAndUpdate(
     { oldDate },
     { $pull: { slots: { startTime: oldStartTime, endTime: oldEndTime } } }
@@ -129,7 +126,6 @@ router.post("/rescheduleAppointment", async (req, res) => {
   }
   //  adding the new slot
   let newAppointment = await Appointment.find({ date: newDate }, { _id: 0 });
-  // console.log(newAppointment.slots.length);
   if (newAppointment.length > 0) {
     if (
       helperFunctions.checkOverlappingTime(
@@ -155,50 +151,6 @@ router.post("/rescheduleAppointment", async (req, res) => {
     let result = await newAppointment.save();
     res.status(201).send(result.slots);
   }
-  // // deleting old slot
-  // if (existingAppointment.length > 0) {
-  //   let status = await Appointment.findOneAndUpdate(
-  //     { date: oldDate },
-  //     { $pull: { slots: { startTime: oldStartTime, endTime: oldEndTime } } }
-  //   );
-  //   console.log(status.modifiedCount);
-  //   if (status) {
-  //     console.log("deleted the old record");
-  //   } else {
-  //     res.status(200).send("This time slot does not exists");
-  //     return;
-  //   }
-  //   // adding the new slot
-  //   let newAppointment = await Appointment.find({ date: newDate }, { _id: 0 });
-  //   // console.log(newAppointment.slots.length);
-  //   if (newAppointment.length > 0) {
-  //     if (
-  //       helperFunctions.checkOverlappingTime(
-  //         existingAppointment[0].slots,
-  //         newStartTime,
-  //         newEndTime
-  //       )
-  //     ) {
-  //       let result = await Appointment.findOneAndUpdate(
-  //         { date: newDate },
-  //         { $push: { slots: { newStartTime, newEndTime } } }
-  //       );
-  //       res.status(201).send(await helperFunctions.getDataByDate(newDate));
-  //       return;
-  //     } else {
-  //       res.status(400).send("Slot not available at this time");
-  //     }
-  //   } else {
-  //     let newAppointment = new Appointment({
-  //       date: newDate,
-  //       slots: [{ startTime: newStartTime, endTime: newEndTime }],
-  //     });
-  //     let result = await newAppointment.save();
-  //     res.status(201).send(result.slots);
-  //   }
-  // } else {
-  //   res.status(200).send("No Appointment exists for this date");
-  // }
 });
 
 module.exports = router;
