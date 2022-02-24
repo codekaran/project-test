@@ -1,4 +1,5 @@
 var express = require("express");
+const { compile } = require("morgan");
 var router = express.Router();
 const Appointment = require("../data/appointments");
 const helperFunctions = require("../helperFunctions");
@@ -62,23 +63,33 @@ router.post("/cancelAppointment", async (req, res) => {
   let startTime = slot.split(" ")[1];
   let endTime = slot.split(" ")[2];
   console.log(startTime, endTime);
-  let existingAppointment = await Appointment.findOne(
-    { date: date },
-    { _id: 0 }
+
+  let status = await Appointment.findOneAndUpdate(
+    { date },
+    { $pull: { slots: { startTime, endTime } } }
   );
-  if (existingAppointment) {
-    let status = await Appointment.findOneAndUpdate(
-      { date },
-      { $pull: { slots: { startTime, endTime } } }
-    );
-    console.log(status.modifiedCount);
-    if (status) {
-      res.status(200).send(await helperFunctions.getDataByDate(date));
+  console.log("status");
+  console.log(status);
+  if (status) {
+    console.log("inside");
+    let existingSlots = status.slots;
+    let remainingSlots = await helperFunctions.getDataByDate(date);
+    console.log(existingSlots, remainingSlots.slots);
+    if (remainingSlots.slots.length == 0) {
+      console.log("removiing the date");
+      await Appointment.deleteOne({ date });
+    }
+    if (existingSlots.length > remainingSlots.slots.length) {
+      console.log("Deleted the slot");
+      if (await helperFunctions.getDataByDate(date))
+        res.status(200).send(await helperFunctions.getDataByDate(date));
+      else res.status(200).send("All the slots are deleted for this date");
+      // }
     } else {
       res.status(200).send("This time slot does not exists");
     }
   } else {
-    res.status(200).send("No Appointment exists for this date");
+    res.status(200).send("No Slot available for this date");
   }
 });
 
@@ -93,34 +104,30 @@ router.post("/rescheduleAppointment", async (req, res) => {
   let newDate = newSlot.split(" ")[0];
   let newStartTime = newSlot.split(" ")[1];
   let newEndTime = newSlot.split(" ")[2];
-  let existingAppointment = await Appointment.findOne(
+  let existingAppointment = await Appointment.find(
     { date: oldDate },
     { _id: 0 }
   );
   // deleting old slot
-  if (existingAppointment) {
+  if (existingAppointment.length > 0) {
     let status = await Appointment.findOneAndUpdate(
       { date: oldDate },
       { $pull: { slots: { startTime: oldStartTime, endTime: oldEndTime } } }
     );
     console.log(status.modifiedCount);
     if (status) {
-      // res.status(200).send(await helperFunctions.getDataByDate(oldDate));
       console.log("deleted the old record");
     } else {
       res.status(200).send("This time slot does not exists");
       return;
     }
     // adding the new slot
-    let newAppointment = await Appointment.findOne(
-      { date: newDate },
-      { _id: 0 }
-    );
-    console.log(newAppointment.slots.length);
-    if (newAppointment && Object.keys(newAppointment.slots[0]) > 0) {
+    let newAppointment = await Appointment.find({ date: newDate }, { _id: 0 });
+    // console.log(newAppointment.slots.length);
+    if (newAppointment.length > 0) {
       if (
         helperFunctions.checkOverlappingTime(
-          existingAppointment.slots,
+          existingAppointment[0].slots,
           newStartTime,
           newEndTime
         )

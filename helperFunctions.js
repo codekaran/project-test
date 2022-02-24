@@ -60,7 +60,6 @@ exports.checkOverlappingTime = checkOverlappingTime;
 
 const getDataByDate = async (date) => {
   let data = await Appointment.findOne({ date }, { _id: 0 });
-  console.log(data);
   return data;
 };
 exports.getDataByDate = getDataByDate;
