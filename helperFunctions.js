@@ -1,6 +1,8 @@
 const Appointment = require("./data/appointments");
 
 const checkOverlappingTime = (slots, startTime, endTime) => {
+  console.log("checking overlapping");
+  console.log(slots);
   let incomingStartTime;
   let incomingEndTime;
   let output;
@@ -29,15 +31,15 @@ const checkOverlappingTime = (slots, startTime, endTime) => {
     //   existingStartTime,
     //   existingEndTime
     // );
-    // console.log(
-    //   incomingStartTime > existingStartTime &&
-    //     incomingStartTime < existingEndTime,
-    //   incomingEndTime < existingStartTime && incomingEndTime > existingEndTime,
-    //   incomingStartTime < existingStartTime &&
-    //     incomingEndTime > existingEndTime,
-    //   incomingStartTime == existingStartTime &&
-    //     incomingEndTime == existingEndTime
-    // );
+    console.log(
+      incomingStartTime > existingStartTime &&
+        incomingStartTime < existingEndTime,
+      incomingEndTime < existingStartTime && incomingEndTime > existingEndTime,
+      incomingStartTime < existingStartTime &&
+        incomingEndTime > existingEndTime,
+      incomingStartTime == existingStartTime &&
+        incomingEndTime == existingEndTime
+    );
     if (
       (incomingStartTime > existingStartTime &&
         incomingStartTime < existingEndTime) ||

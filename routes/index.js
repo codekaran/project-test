@@ -11,12 +11,12 @@ router.post("/appointment", async function (req, res, next) {
     let date = slot.split(" ")[0];
     let startTime = slot.split(" ")[1];
     let endTime = slot.split(" ")[2];
-    let existingAppointment = await Appointment.findOne(
+    let existingAppointment = await Appointment.find(
       { date: date },
       { _id: 0 }
     );
-    console.log(existingAppointment);
-    if (existingAppointment && Object.keys(existingAppointment.slots[0]) > 0) {
+    console.log(existingAppointment[0]);
+    if (existingAppointment.length > 0) {
       let slots = existingAppointment[0].slots;
       if (helperFunctions.checkOverlappingTime(slots, startTime, endTime)) {
         let result = await Appointment.findOneAndUpdate(
