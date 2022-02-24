@@ -81,8 +81,8 @@ router.post("/cancelAppointment", async (req, res) => {
     }
     if (existingSlots.length > remainingSlots.slots.length) {
       console.log("Deleted the slot");
-      if (await helperFunctions.getDataByDate(date))
-        res.status(200).send(await helperFunctions.getDataByDate(date));
+      let currentData = await helperFunctions.getDataByDate(date);
+      if (currentData) res.status(200).send(currentData);
       else res.status(200).send("All the slots are deleted for this date");
       // }
     } else {
