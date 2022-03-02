@@ -41,8 +41,9 @@ router.post("/appointment", async function (req, res, next) {
       appointmentDate,
       $or: [{ startTime: { $gte: endTime } }, { endTime: { $lte: startTime } }],
     });
+    let count = await Appointment.count({ appointmentDate });
     console.log(existingAppointment);
-    if (existingAppointment.length > 0) {
+    if (existingAppointment.length == count) {
       let output = await helperFunctions.saveInDB(
         appointmentDate,
         startTime,
@@ -160,7 +161,8 @@ router.post("/rescheduleAppointment", async (req, res) => {
     ],
   });
   console.log(existingAppointment);
-  if (existingAppointment.length > 0) {
+  let count = await Appointment.count({ appointmentDate: newDate });
+  if (existingAppointment.length == count) {
     let output = await helperFunctions.saveInDB(
       newDate,
       newStartTime,
